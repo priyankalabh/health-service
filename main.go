@@ -1,41 +1,19 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-type healthResponse struct {
-	Status string `json:"status"`
-}
-
 func main() {
-	http.HandleFunc("/api/health", healthHandler)
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		log.Fatalf("error occured in listen n serve %v", err)
-	}
+	router := gin.Default()
+	router.GET("/api/health", healthHandler)
+	router.Run(":7070")
 }
 
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
-	x := healthResponse{
-		Status: "alive",
-	}
-	data, err := json.Marshal(&x)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	_, err = w.Write(data)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	return
+func healthHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"status": "alive",
+	})
 }
