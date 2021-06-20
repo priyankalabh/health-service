@@ -1,19 +1,27 @@
 package main
 
 import (
-	"net/http"
+	"flag"
+	"health-service/router"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
-	router := gin.Default()
-	router.GET("/api/health", healthHandler)
-	router.Run(":7070")
+var (
+	port string
+)
+
+func init() {
+	flag.StringVar(&port, "port", ":7070", "this is a REST server port")
 }
 
-func healthHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"status": "alive",
-	})
+func main() {
+	flag.Parse()
+	server := gin.Default()
+	router.AttachRouter(server)
+	err := server.Run(port)
+	if err != nil {
+		log.Fatalf("Run error: %v", err)
+	}
 }
